@@ -1,0 +1,71 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}
+
+\title{Methods and Tools for Industrial Automation \\ Second Project}
+\author{M. Cardano - M. Cardellini - S. Lavaggi}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+
+\section{Mixed Integer Linear Programming Model}
+
+\paragraph{Parameters}
+\begin{eqnarray*}
+	n &=& \text{number of jobs} \\
+	m &=& \text{number of machines} \\
+	d_{i,k} & = & \text{duration of $J_i$  on $M_k$} \\
+	M &=& \text{upper bound of completion time}
+\end{eqnarray*}
+\paragraph{Variables}
+\begin{eqnarray*}
+	x_{k,i,j} & = & 
+	\begin{cases}
+		1 & \text{if on  $M_k$ job $J_i$ is executed before $J_j$ } \\
+		0 & \text{otherwise}
+	\end{cases} \\
+	t_{i,k} & = & \text{start time of $J_i$ on $M_k$} \\
+	C_{max} & = & \text{max completion time}
+\end{eqnarray*}
+\paragraph{Objective function}
+\begin{equation*}
+	\min{C_{max}}
+\end{equation*}
+\paragraph{Constraints}
+\subparagraph{1} Avoid overlapping of jobs in machines
+\begin{eqnarray*}
+t_{j,k} &\geq& t_{i,k} + d_{i_k} - M(1 - x_{k,i,j})  \\
+t_{i,k} &\geq& t_{j,k} + d_{j_k} - M(x_{k,i,j})  
+\end{eqnarray*}
+
+for each $i = 1,\dots,n$ and $j = 1,\dots,n$ and $k = 1,\dots,m$ with $i \neq j$
+\subparagraph{2} Jobs in machines has to be completed in order
+\begin{equation*}
+t_{i,k} + d_{i,k} \leq t_{i,k+1} 
+\end{equation*}
+
+for each  $i=1,\dots,n$ and $k=1,\dots,m-1$
+\subparagraph{3} Completion time
+\begin{align*}
+C_{max} &\geq t_{i,m} + d_{i,m}
+\end{align*}
+
+for each $i=1,\dots,n$
+\subparagraph{4} Positive times
+\begin{align*}
+t_{i,k} &\geq 0 
+\end{align*}
+
+for each  $i=1,\dots,n$ and $k=1,\dots,m$
+\subparagraph{5} Binary variables
+\begin{align*}
+x_{k,i,j} &\in \{0,1\}
+\end{align*}
+
+for each  $i = 1,\dots,n$ and $j = 1,\dots,n$ and $k = 1,\dots,m$
+\end{document}

@@ -1,0 +1,75 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}
+
+\title{Methods and Tools for Industrial Automation \\ Third Project}
+\author{M. Cardano - M. Cardellini - S. Lavaggi}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+
+\section{Mixed Integer Linear Programming Model}
+\paragraph{Sets}
+We call $M$ the set containing only the retailers. $M'$ is the set in which the supplier is also included. $T$ is the set containing the days in which the simulation is run. \\\\
+In our example:
+\begin{eqnarray*}
+M &=& \{1,2, \dots, 6\} \\
+M' &=& \{1,2,  \dots, 6, 7\} \\
+T &=& \{1,2, \dots, 10\} 	
+\end{eqnarray*}
+
+\paragraph{Parameters}
+\begin{eqnarray*}
+	c_{ij} &=& \text{cost to reach node $j \in M'$ from node $i \in M'$} \\
+	r_{st} &=& \text{demand for supplier $s \in M$ in day $t \in T$} \\
+	C & = & \text{max capacity of truck ($39kL$)}\\
+	\hat{I}_s & = & \text{initial inventory for supplier $s \in M$}
+\end{eqnarray*}
+
+\paragraph{Variables}
+\begin{eqnarray*}
+	x_{st} &=& \text{quantity ($\geq 0$) shipped to retailer $s \in M$ at time $t \in T$}\\
+	I_{st} &=& \text{inventory ($\geq 0$) of retailer $s \in M$ at time $t \in T$}\\
+	z_{i,t} & = & 
+	\begin{cases}
+		1 & \text{if node $i \in M'$ is visited at time $t \in T$} \\
+		0 & \text{otherwise}
+	\end{cases} \\
+	y_{ij}^t & = & \begin{cases}
+		1 & \text{if the arc $(i,j)$ is traveled at time $t$} \\
+		0 & \text{otherwise}
+	\end{cases} \\
+	&& i \in M \;\;\;\;\;\; j \in \{j \vert j \in M \wedge j <i \} \;\;\;\;\;\; t \in T
+	\\
+	y_{i7}^t & \in & \{0,1,2\} \;\;\;\; i \in M \;\;\;\; t \in T
+\end{eqnarray*}
+
+\paragraph{Objective function}
+\begin{equation*}
+	\min{\Bigg[\Big(\frac{0.03}{365}\sum_{s\in M}\sum_{t \in T} I_{st}\Big) + \Big(\sum_{i \in M'}\sum_{j \in M', j <i}\sum_{t\in T}c_{ij}y_{ij}^t\Big)\Bigg]}
+\end{equation*}
+
+\paragraph{Constraints}
+\subparagraph{C1} Inventory definition at retailers
+$$I_{st} = I_{st-1} + x_{st-1}-r_{st-1} \;\;\; s \in M, t\in T $$
+\subparagraph{C2} Truck constraints
+$$\sum_{s \in M} x_{st} \leq C \;\;\; t\in T $$
+\subparagraph{C3} A node can be visited only once
+$$\sum_{j \in M', j<i} y_{ij}^t + \sum_{j \in M', j>i} y_{ji}^t = 2z_{it} \;\;\; i \in M', t \in T$$
+\subparagraph{C4} Constraint to force binary on $y_{ij}^t$ with $j \neq 0$
+$$y_{ij}^t \leq 1 \;\;\; i \in M, j \in M, t \in T$$
+\subparagraph{C5} Constraint to avoid transportation without a trip
+$$x_{it} \leq C\sum_{j \in M'}y_{ij}^t  \;\;\; i \in M, t \in T$$
+\subparagraph{C6} Only 3 nodes can be visited for each day (1 supplier + 2 retailers)
+$$\sum_{i \in M'}z_{it} \leq 3 \;\;\;  t \in T$$
+\subparagraph{C7} The graph is undirected so the  matrix has to be lower triangular
+$$y_{ij}^t = 0 \;\;\; i \in M, j \in M, j \geq i, t \in T$$
+\subparagraph{C8} Constraint to set the initial inventory 
+$$I_{s0} = \hat{I_s} \;\;\; s \in M$$
+
+\end{document}

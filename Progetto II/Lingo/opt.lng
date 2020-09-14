@@ -1,0 +1,35 @@
+SETS:
+JOB/1..4/:;
+MACHINE/1..5/:;
+PAIR(JOB, MACHINE):time,duration;
+TRIPLE(MACHINE, JOB, JOB):x;
+ENDSETS
+
+DATA:
+m = 5;
+n = 4;
+bigM = 10000;
+duration = 
+	7     1     3     4     5
+ 	8     3     6     5     9
+	10     2     7     2     5
+          5     4     2     1     6;
+ENDDATA
+
+!Funz obiettivo jobs in ritardo;
+MIN = Cmax;
+
+!vincoli;
+
+@for(TRIPLE(k,i,j)|i#NE#j: time(j,k) >= time(i,k) + duration(i,k) - bigM*(1 - x(k,i,j)));
+@for(TRIPLE(k,i,j)|i#NE#j: time(i,k) >= time(j,k) + duration(j,k) - bigM*x(k,i,j));
+@for(TRIPLE(k,i,j): @bin(x(k,i,j)));
+
+
+@for(PAIR(i,k)|k#LT#m: time(i,k) + duration(i,k) <= time(i, k+1));
+
+@for(JOB(i):Cmax >= time(i,m) + duration(i,m));
+
+
+@for(PAIR(i,k): time(i,k) >= 0);
+@for(PAIR(i,k): duration(i,k) >= 0);
